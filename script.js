@@ -18,7 +18,6 @@ let fireParticles = [];
 let obstacles = [];
 let score = 0;
 let highScore = localStorage.getItem("highScore") || 0;
-let worldHighScore = 0;
 let speed = 0;
 let gameOver = false;
 let gameStarted = false;
