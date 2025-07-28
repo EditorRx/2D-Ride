@@ -1,7 +1,6 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-// Set base game resolution
 let baseWidth = 800;
 let baseHeight = 300;
 canvas.width = baseWidth;
@@ -11,10 +10,6 @@ let groundY = 220;
 function resizeCanvas() {
   const container = document.getElementById("game-container");
   const rect = container.getBoundingClientRect();
-
-  canvas.width = baseWidth;
-  canvas.height = baseHeight;
-
   canvas.style.width = rect.width + "px";
   canvas.style.height = (rect.width / (baseWidth / baseHeight)) + "px";
 }
@@ -58,6 +53,7 @@ function jump(event) {
   }
 }
 
+// Input listeners
 if ("ontouchstart" in window) {
   window.addEventListener("touchstart", jump, { passive: false });
 } else {
@@ -67,6 +63,7 @@ document.addEventListener("keydown", e => {
   if (e.code === "Space" || e.code === "ArrowUp") jump();
 });
 
+// Fire Particles
 function addFire() {
   for (let i = 0; i < 5; i++) {
     fireParticles.push({
@@ -92,21 +89,15 @@ function drawFire() {
   fireParticles = fireParticles.filter(p => p.alpha > 0);
 }
 
+// Obstacles
 function spawnObstacle() {
   if ((score < 2000 && obstacles.length >= 1) || (score >= 2000 && obstacles.length >= 2)) return;
-
   let last = obstacles[obstacles.length - 1];
   if (last && canvas.width - last.x < 250) return;
 
   let type = Math.random() > 0.5 ? 'car' : 'stone';
   let width = type === 'car' ? 70 : 40;
-
   obstacles.push({ x: canvas.width + 50, y: 240, width, height: 30, type });
-}
-
-function drawRider() {
-  ctx.fillStyle = "#333";
-  ctx.fillRect(rider.x, rider.y, rider.width, rider.height);
 }
 
 function drawObstacle(obs) {
@@ -114,6 +105,13 @@ function drawObstacle(obs) {
   ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
 }
 
+// Rider
+function drawRider() {
+  ctx.fillStyle = "#333";
+  ctx.fillRect(rider.x, rider.y, rider.width, rider.height);
+}
+
+// Collision
 function checkCollision(obs) {
   return (
     rider.x < obs.x + obs.width &&
@@ -123,6 +121,7 @@ function checkCollision(obs) {
   );
 }
 
+// Restart
 function restartGame() {
   obstacles = [];
   fireParticles = [];
@@ -141,13 +140,12 @@ function restartGame() {
   document.getElementById("game-over").style.display = "none";
   document.getElementById("pause-button").innerText = "⏸ Pause";
 
-  // Start the game loop
   requestAnimationFrame(update);
 }
 
+// Pause
 function togglePause() {
   if (!gameStarted || gameOver) return;
-
   isPaused = !isPaused;
   document.getElementById("pause-button").innerText = isPaused ? "▶ Resume" : "⏸ Pause";
 
@@ -157,11 +155,13 @@ function togglePause() {
   }
 }
 
+// Update loop
 function update() {
   if (gameOver || !gameStarted || isPaused) return;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Gravity and Jump
   rider.vy += 0.7;
   rider.y += rider.vy;
 
@@ -180,6 +180,7 @@ function update() {
   drawFire();
   spawnObstacle();
 
+  // Obstacles update
   for (let obs of obstacles) {
     obs.x -= obstacleSpeed;
     drawObstacle(obs);
@@ -193,13 +194,13 @@ function update() {
         highScore = score;
         localStorage.setItem("highScore", highScore);
       }
-
-      return; // Stop the loop on game over
+      return;
     }
   }
 
   obstacles = obstacles.filter(obs => obs.x + obs.width > 0);
 
+  // Difficulty increase
   if (score % 500 === 0 && obstacleSpeed < 8) {
     obstacleSpeed += 0.1;
   }
@@ -217,10 +218,5 @@ function update() {
   document.getElementById("speed").innerText = "Speed: " + speed + " m/s";
   document.getElementById("time").innerText = "Time: " + minutes + ":" + seconds;
 
-  requestAnimationFrame(update); // Schedule next frame
+  requestAnimationFrame(update);
 }
-
-// Start the game loop when the page loads or after restart
-window.addEventListener("load", () => {
-  // Optionally start the game automatically or wait for user input
-});
