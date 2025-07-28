@@ -141,6 +141,7 @@ function restartGame() {
   document.getElementById("game-over").style.display = "none";
   document.getElementById("pause-button").innerText = "⏸ Pause";
 
+  // Start the game loop
   requestAnimationFrame(update);
 }
 
@@ -193,7 +194,7 @@ function update() {
         localStorage.setItem("highScore", highScore);
       }
 
-      return;
+      return; // Stop the loop on game over
     }
   }
 
@@ -216,5 +217,10 @@ function update() {
   document.getElementById("speed").innerText = "Speed: " + speed + " m/s";
   document.getElementById("time").innerText = "Time: " + minutes + ":" + seconds;
 
-  requestAnimationFrame(update);
-                         }
+  requestAnimationFrame(update); // Schedule next frame
+}
+
+// Start the game loop when the page loads or after restart
+window.addEventListener("load", () => {
+  // Optionally start the game automatically or wait for user input
+});
