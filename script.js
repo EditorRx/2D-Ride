@@ -194,7 +194,6 @@ function update() {
 
   document.getElementById("score").innerText = "Score: " + score;
   document.getElementById("high-score").innerText = "High: " + highScore;
-  document.getElementById("wh").innerText = "WH: " + worldHighScore;
   document.getElementById("speed").innerText = "Speed: " + speed;
   document.getElementById("time").innerText = "Time: " + minutes + ":" + seconds;
 
