@@ -114,7 +114,7 @@ function restartGame() {
   gameStarted = true;
   isPaused = false;
 
-  startTime = Date.now(); // Start time set
+  startTime = Date.now();
   elapsedTime = 0;
 
   document.getElementById("game-over").style.display = "none";
@@ -129,9 +129,8 @@ function togglePause() {
   isPaused = !isPaused;
   document.getElementById("pause-button").innerText = isPaused ? "▶ Resume" : "⏸ Pause";
 
-  // resume game loop if unpaused
   if (!isPaused) {
-    startTime = Date.now() - elapsedTime * 1000; // resume from where it paused
+    startTime = Date.now() - elapsedTime * 1000;
     requestAnimationFrame(update);
   }
 }
@@ -162,6 +161,8 @@ function update() {
 
   for (let i = 0; i < obstacles.length; i++) {
     let obs = obstacles[i];
+    if (!obs) continue;
+
     obs.x -= obstacleSpeed;
     drawObstacle(obs);
 
@@ -186,7 +187,7 @@ function update() {
   score++;
   if (speed < 777) speed++;
 
-  // ⏱️ Update time display
+  // Update time display
   elapsedTime = Math.floor((Date.now() - startTime) / 1000);
   let minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
   let seconds = String(elapsedTime % 60).padStart(2, '0');
