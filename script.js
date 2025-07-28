@@ -1,20 +1,9 @@
 const canvas = document.getElementById("gameCanvas");
 const ctx = canvas.getContext("2d");
 
-const baseWidth = 800;
-const baseHeight = 300;
-canvas.width = baseWidth;
-canvas.height = baseHeight;
+canvas.width = 800;
+canvas.height = 300;
 let groundY = 220;
-
-function resizeCanvas() {
-  const container = document.getElementById("game-container");
-  const rect = container.getBoundingClientRect();
-  canvas.style.width = rect.width + "px";
-  canvas.style.height = (rect.width / (baseWidth / baseHeight)) + "px";
-}
-window.addEventListener("resize", resizeCanvas);
-resizeCanvas();
 
 let rider = {
   x: 50,
@@ -35,16 +24,13 @@ let gameOver = false;
 let gameStarted = false;
 let isPaused = false;
 let obstacleSpeed = 4;
+
+// ⏱️ Running time tracking
 let startTime = null;
 let elapsedTime = 0;
-let lastJumpTime = 0;
 
 function jump(event) {
   event?.preventDefault?.();
-  const now = Date.now();
-  if (now - lastJumpTime < 150) return;
-  lastJumpTime = now;
-
   if (!rider.jumping && gameStarted && !isPaused) {
     rider.vy = -18;
     rider.jumping = true;
@@ -53,11 +39,9 @@ function jump(event) {
   }
 }
 
-if ("ontouchstart" in window) {
-  window.addEventListener("touchstart", jump, { passive: false });
-} else {
-  window.addEventListener("mousedown", jump);
-}
+// Controls
+window.addEventListener("touchstart", jump);
+window.addEventListener("mousedown", jump);
 document.addEventListener("keydown", e => {
   if (e.code === "Space" || e.code === "ArrowUp") jump();
 });
@@ -89,11 +73,13 @@ function drawFire() {
 
 function spawnObstacle() {
   if ((score < 2000 && obstacles.length >= 1) || (score >= 2000 && obstacles.length >= 2)) return;
+
   let last = obstacles[obstacles.length - 1];
   if (last && canvas.width - last.x < 250) return;
 
   let type = Math.random() > 0.5 ? 'car' : 'stone';
   let width = type === 'car' ? 70 : 40;
+
   obstacles.push({ x: canvas.width + 50, y: 240, width, height: 30, type });
 }
 
@@ -128,8 +114,9 @@ function restartGame() {
   gameOver = false;
   gameStarted = true;
   isPaused = false;
+
+  startTime = Date.now(); // Start time set
   elapsedTime = 0;
-  startTime = Date.now();
 
   document.getElementById("game-over").style.display = "none";
   document.getElementById("pause-button").innerText = "⏸ Pause";
@@ -143,8 +130,9 @@ function togglePause() {
   isPaused = !isPaused;
   document.getElementById("pause-button").innerText = isPaused ? "▶ Resume" : "⏸ Pause";
 
+  // resume game loop if unpaused
   if (!isPaused) {
-    startTime = Date.now() - elapsedTime * 1000;
+    startTime = Date.now() - elapsedTime * 1000; // resume from where it paused
     requestAnimationFrame(update);
   }
 }
@@ -154,6 +142,7 @@ function update() {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+  // Physics
   rider.vy += 0.7;
   rider.y += rider.vy;
 
@@ -172,7 +161,8 @@ function update() {
   drawFire();
   spawnObstacle();
 
-  for (let obs of obstacles) {
+  for (let i = 0; i < obstacles.length; i++) {
+    let obs = obstacles[i];
     obs.x -= obstacleSpeed;
     drawObstacle(obs);
 
@@ -180,7 +170,6 @@ function update() {
       gameOver = true;
       gameStarted = false;
       document.getElementById("game-over").style.display = "block";
-
       if (score > highScore) {
         highScore = score;
         localStorage.setItem("highScore", highScore);
@@ -198,19 +187,16 @@ function update() {
   score++;
   if (speed < 777) speed++;
 
+  // ⏱️ Update time display
   elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-  const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, "0");
-  const seconds = String(elapsedTime % 60).padStart(2, "0");
+  let minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
+  let seconds = String(elapsedTime % 60).padStart(2, '0');
 
-  document.getElementById("score").innerText = score;
-  document.getElementById("hi").innerText = highScore;
-  document.getElementById("wh").innerText = worldHighScore;
-  document.getElementById("speed").innerText = speed;
-  document.getElementById("time").innerText = `${minutes}:${seconds}`;
+  document.getElementById("score").innerText = "Score: " + score;
+  document.getElementById("high-score").innerText = "High: " + highScore;
+  document.getElementById("wh").innerText = "WH: " + worldHighScore;
+  document.getElementById("speed").innerText = "Speed: " + speed;
+  document.getElementById("time").innerText = "Time: " + minutes + ":" + seconds;
 
   requestAnimationFrame(update);
 }
-
-document.getElementById("race-button").addEventListener("click", restartGame);
-document.getElementById("pause-button").addEventListener("click", togglePause);
-document.getElementById("restart-button").addEventListener("click", restartGame);
