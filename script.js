@@ -24,7 +24,6 @@ let gameStarted = false;
 let isPaused = false;
 let obstacleSpeed = 4;
 
-// ⏱️ Running time tracking
 let startTime = null;
 let elapsedTime = 0;
 
@@ -38,7 +37,6 @@ function jump(event) {
   }
 }
 
-// Controls
 window.addEventListener("touchstart", jump);
 window.addEventListener("mousedown", jump);
 document.addEventListener("keydown", e => {
@@ -72,23 +70,21 @@ function drawFire() {
 
 function spawnObstacle() {
   if ((score < 2000 && obstacles.length >= 1) || (score >= 2000 && obstacles.length >= 2)) return;
-
   let last = obstacles[obstacles.length - 1];
   if (last && canvas.width - last.x < 250) return;
 
   let type = Math.random() > 0.5 ? 'car' : 'stone';
   let width = type === 'car' ? 70 : 40;
-
   obstacles.push({ x: canvas.width + 50, y: 240, width, height: 30, type });
 }
 
 function drawRider() {
-  ctx.fillStyle = "#333";
+  ctx.fillStyle = "#000";
   ctx.fillRect(rider.x, rider.y, rider.width, rider.height);
 }
 
 function drawObstacle(obs) {
-  ctx.fillStyle = obs.type === 'car' ? "blue" : "gray";
+  ctx.fillStyle = "#000";
   ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
 }
 
@@ -113,22 +109,17 @@ function restartGame() {
   gameOver = false;
   gameStarted = true;
   isPaused = false;
-
   startTime = Date.now();
   elapsedTime = 0;
-
   document.getElementById("game-over").style.display = "none";
   document.getElementById("pause-button").innerText = "⏸ Pause";
-
   requestAnimationFrame(update);
 }
 
 function togglePause() {
   if (!gameStarted || gameOver) return;
-
   isPaused = !isPaused;
   document.getElementById("pause-button").innerText = isPaused ? "▶ Resume" : "⏸ Pause";
-
   if (!isPaused) {
     startTime = Date.now() - elapsedTime * 1000;
     requestAnimationFrame(update);
@@ -140,15 +131,10 @@ function update() {
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-  // Physics
   rider.vy += 0.7;
   rider.y += rider.vy;
 
-  if (rider.y < 2) {
-    rider.y = 2;
-    rider.vy = 0;
-  }
-
+  if (rider.y < 2) rider.y = 2;
   if (rider.y >= groundY) {
     rider.y = groundY;
     rider.vy = 0;
@@ -159,13 +145,9 @@ function update() {
   drawFire();
   spawnObstacle();
 
-  for (let i = 0; i < obstacles.length; i++) {
-    let obs = obstacles[i];
-    if (!obs) continue;
-
+  for (let obs of obstacles) {
     obs.x -= obstacleSpeed;
     drawObstacle(obs);
-
     if (checkCollision(obs)) {
       gameOver = true;
       gameStarted = false;
@@ -187,13 +169,12 @@ function update() {
   score++;
   if (speed < 777) speed++;
 
-  // Update time display
   elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-  let minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
-  let seconds = String(elapsedTime % 60).padStart(2, '0');
+  const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
+  const seconds = String(elapsedTime % 60).padStart(2, '0');
 
   document.getElementById("score").innerText = "Score: " + score;
-  document.getElementById("high-score").innerText = "High: " + highScore;
+  document.getElementById("high-score").innerText = "Hi: " + highScore;
   document.getElementById("speed").innerText = "Speed: " + speed;
   document.getElementById("time").innerText = "Time: " + minutes + ":" + seconds;
 
