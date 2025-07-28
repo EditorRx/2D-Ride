@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0" />
+  <title>2D Rider</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- Scoreboard -->
+  <div id="scoreboard">
+    <span id="score">Score: 0 m</span> |
+    <span id="high-score">HI: 0 m</span> |
+    <span id="wh">Wh: 0 m</span> |
+    <span id="speed">Speed: 0 m/s</span> |
+    <span id="time">Time: 00:00</span>
+  </div>
+
+  <!-- Game Container -->
+  <div id="game-container">
+    <!-- Game Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Game Over Screen -->
+    <div id="game-over">Game Over</div>
+
+    <!-- Controls -->
+    <div id="controls">
+      <button id="restart-button" onclick="restartGame()">🔁 Restart</button>
+      <button id="race-button" onclick="restartGame()">🏁 Race 🏁</button>
+      <button id="pause-button" onclick="togglePause()">⏸ Pause</button>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
