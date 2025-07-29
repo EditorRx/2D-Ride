@@ -15,22 +15,62 @@
     <span id="speed">Speed: 0</span> |
     <span id="time">Time: 00:00</span>
   </div>
-
-  <!-- Game Container -->
+  
   <div id="game-container">
-    <!-- Game Canvas -->
+    <!-- 🔸 Static image (only visible before game starts) -->
+    <img id="start-image" src="assets/ready.png" alt="Ready" />
+
+    <!-- 🔸 Background video -->
+    <video id="bg-video" src="assets/back.mp4" muted loop playsinline></video>
+
+    <!-- 🔸 Background music (will be triggered in JS) -->
+    <audio id="bg-music" src="assets/Game.mp3" preload="auto"></audio>
+
+    <!-- 🔸 Game canvas -->
     <canvas id="gameCanvas"></canvas>
 
-    <!-- Game Over Screen -->
+    <!-- 🔸 Game over screen -->
     <div id="game-over">Game Over</div>
+  </div>
 
-    <!-- Controls -->
-    <div id="controls">
-      <button id="restart-button" onclick="restartGame()">🔁 Restart</button>
-      <button id="race-button" onclick="restartGame()">🏁 Race 🏁</button>
-      <button id="pause-button" onclick="togglePause()">⏸ Pause</button>
+  <!-- Controls -->
+  <div id="controls">
+    <button id="restart-button" onclick="restartGame()">🔁 Restart</button>
+    <button id="race-button" onclick="restartGame()">🏁 Race 🏁</button>
+    <button id="pause-button" onclick="togglePause()">⏸ Pause</button>
+  </div>
+  
+  <!-- How to Play Section -->
+<div id="extra-section">
+  <div class="accordion">
+    <div class="accordion-item">
+      <div class="accordion-header" onclick="toggleAccordion(this)">
+        <span>🎮 How to Play</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="accordion-content">
+        <p>• Click “Race” to start the game.<br>
+           • For Computer : 
+           Press Spacebar or click to jump.<br>
+           • For phones : Touch anywhere on screen to jump. <br>
+           • Avoid obstacles.<br>
+           • Use “Pause” to pause and “Restart” anytime.<br>
+           • Score and speed increase over time.<br>
+           • Game over? Click Restart and go again!</p>
+      </div>
     </div>
   </div>
+</div>
+
+<!-- Footer -->
+<div id="footer">
+  <a href="https://youtube.com/@rsgoblivion?si=BR1UY0YTHUYf4KQ5" target="_blank" id="yt-link">❇️Yt-Oblivion</a>
+</div>
+
+<!-- Footer line -->
+<div id="footer-line">
+  Created by <strong>RSG™ – Rahul Kushwaha</strong>
+</div>
 
   <script src="script.js"></script>
 </body>
