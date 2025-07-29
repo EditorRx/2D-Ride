@@ -88,7 +88,7 @@ function drawFire() {
 function spawnObstacle() {
   if ((score < 7777 && obstacles.length >= 1) || (score >= 7777 && obstacles.length >= 2)) return;
   let last = obstacles[obstacles.length - 1];
-  if (last && canvas.width - last.x < 250) return;
+  if (last && canvas.width - last.x < 500) return;
 
   let type = Math.random() > 1 ? "car" : "stone";
   let width = 55;
