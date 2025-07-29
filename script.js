@@ -3,14 +3,30 @@ const ctx = canvas.getContext("2d");
 
 canvas.width = 800;
 canvas.height = 300;
-let groundY = 220;
+
+let groundY = 250; // road height
+let riderOffset = -11; // 🔹 distance from road
+
+const bikeImg = new Image();
+bikeImg.src = "images/bike.png";
+
+const carImg = new Image();
+carImg.src = "assets/car.png";
+
+const stoneImg = new Image();
+stoneImg.src = "images/box.png";
+
+// ⬇️ DOM references for media control
+const bgVideo = document.getElementById("bg-video");
+const startImage = document.getElementById("start-image");
+const bgMusic = document.getElementById("bg-music"); // Optional: if you have <audio id="bg-music">
 
 let rider = {
-  x: 50,
-  y: groundY,
-  width: 60,
-  height: 40,
-  vy: 0,
+  x: 40,
+  y: groundY - 70 - riderOffset,
+  width: 70,
+  height: 70,
+  vy: 1,
   jumping: false
 };
 
@@ -22,17 +38,18 @@ let speed = 0;
 let gameOver = false;
 let gameStarted = false;
 let isPaused = false;
-let obstacleSpeed = 4;
-
+let obstacleSpeed = 5;
 let startTime = null;
 let elapsedTime = 0;
+let gravityUp = 0.2;
+let gravityDown = 0.2;
 
 function jump(event) {
   event?.preventDefault?.();
   if (!rider.jumping && gameStarted && !isPaused) {
     rider.vy = -18;
     rider.jumping = true;
-    speed = Math.max(0, speed - 7);
+    speed = Math.max(0, speed - 190);
     addFire();
   }
 }
@@ -47,7 +64,7 @@ function addFire() {
   for (let i = 0; i < 5; i++) {
     fireParticles.push({
       x: rider.x,
-      y: rider.y + 30,
+      y: rider.y + 20,
       size: Math.random() * 5 + 3,
       vy: Math.random() * -2,
       alpha: 1
@@ -69,23 +86,37 @@ function drawFire() {
 }
 
 function spawnObstacle() {
-  if ((score < 2000 && obstacles.length >= 1) || (score >= 2000 && obstacles.length >= 2)) return;
+  if ((score < 7777 && obstacles.length >= 1) || (score >= 7777 && obstacles.length >= 2)) return;
   let last = obstacles[obstacles.length - 1];
   if (last && canvas.width - last.x < 250) return;
 
-  let type = Math.random() > 0.5 ? 'car' : 'stone';
-  let width = type === 'car' ? 70 : 40;
-  obstacles.push({ x: canvas.width + 50, y: 240, width, height: 30, type });
+  let type = Math.random() > 1 ? "car" : "stone";
+  let width = 55;
+
+  obstacles.push({
+    x: canvas.width + 10,
+    y: groundY - 30,
+    width,
+    height: 50,
+    type
+  });
+}
+
+function drawRoad() {
+  ctx.fillStyle = "#1d1e1f";
+  ctx.fillRect(0, groundY, canvas.width, 50);
 }
 
 function drawRider() {
-  ctx.fillStyle = "#000";
-  ctx.fillRect(rider.x, rider.y, rider.width, rider.height);
+  ctx.drawImage(bikeImg, rider.x, rider.y, rider.width, rider.height);
 }
 
 function drawObstacle(obs) {
-  ctx.fillStyle = "#000";
-  ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+  if (obs.type === "car") {
+    ctx.drawImage(carImg, obs.x, obs.y, obs.width, obs.height);
+  } else {
+    ctx.drawImage(stoneImg, obs.x, obs.y, obs.width, obs.height);
+  }
 }
 
 function checkCollision(obs) {
@@ -98,12 +129,22 @@ function checkCollision(obs) {
 }
 
 function restartGame() {
+  // 🔹 Show game screen
+  startImage.style.display = "none";
+  bgVideo.style.display = "block";
+  bgVideo.play();
+
+  if (bgMusic) {
+    bgMusic.currentTime = 0;
+    bgMusic.play();
+  }
+
   obstacles = [];
   fireParticles = [];
   score = 0;
   speed = 0;
   obstacleSpeed = 4;
-  rider.y = groundY;
+  rider.y = groundY - rider.height - riderOffset;
   rider.vy = 0;
   rider.jumping = false;
   gameOver = false;
@@ -111,15 +152,22 @@ function restartGame() {
   isPaused = false;
   startTime = Date.now();
   elapsedTime = 0;
+
   document.getElementById("game-over").style.display = "none";
   document.getElementById("pause-button").innerText = "⏸ Pause";
+
   requestAnimationFrame(update);
 }
 
 function togglePause() {
   if (!gameStarted || gameOver) return;
   isPaused = !isPaused;
+
   document.getElementById("pause-button").innerText = isPaused ? "▶ Resume" : "⏸ Pause";
+
+  if (bgMusic) isPaused ? bgMusic.pause() : bgMusic.play();
+  if (bgVideo) isPaused ? bgVideo.pause() : bgVideo.play();
+
   if (!isPaused) {
     startTime = Date.now() - elapsedTime * 1000;
     requestAnimationFrame(update);
@@ -130,14 +178,24 @@ function update() {
   if (gameOver || !gameStarted || isPaused) return;
 
   ctx.clearRect(0, 0, canvas.width, canvas.height);
+  drawRoad();
 
-  rider.vy += 0.7;
+  if (rider.vy < 1) {
+    rider.vy += gravityUp;
+  } else {
+    rider.vy += gravityDown;
+  }
+
   rider.y += rider.vy;
 
-  if (rider.y < 2) rider.y = 2;
-  if (rider.y >= groundY) {
-    rider.y = groundY;
+  if (rider.y < 1) {
+    rider.y = 1;
     rider.vy = 0;
+  }
+
+  if (rider.y >= groundY - rider.height - riderOffset) {
+    rider.y = groundY - rider.height - riderOffset;
+    rider.vy = 0.2;
     rider.jumping = false;
   }
 
@@ -148,10 +206,14 @@ function update() {
   for (let obs of obstacles) {
     obs.x -= obstacleSpeed;
     drawObstacle(obs);
+
     if (checkCollision(obs)) {
       gameOver = true;
       gameStarted = false;
       document.getElementById("game-over").style.display = "block";
+      if (bgMusic) bgMusic.pause();
+      if (bgVideo) bgVideo.pause();
+
       if (score > highScore) {
         highScore = score;
         localStorage.setItem("highScore", highScore);
@@ -170,8 +232,8 @@ function update() {
   if (speed < 777) speed++;
 
   elapsedTime = Math.floor((Date.now() - startTime) / 1000);
-  const minutes = String(Math.floor(elapsedTime / 60)).padStart(2, '0');
-  const seconds = String(elapsedTime % 60).padStart(2, '0');
+  let minutes = String(Math.floor(elapsedTime / 60)).padStart(2, "0");
+  let seconds = String(elapsedTime % 60).padStart(2, "0");
 
   document.getElementById("score").innerText = "Score: " + score;
   document.getElementById("high-score").innerText = "Hi: " + highScore;
@@ -179,4 +241,11 @@ function update() {
   document.getElementById("time").innerText = "Time: " + minutes + ":" + seconds;
 
   requestAnimationFrame(update);
+}
+
+function toggleAccordion(header) {
+  const content = header.nextElementSibling;
+  const arrow = header.querySelector('.arrow');
+  content.classList.toggle('active');
+  arrow.textContent = content.classList.contains('active') ? '▲' : '▼';
 }
